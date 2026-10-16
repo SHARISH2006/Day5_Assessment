@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-100 px-4 py-8 text-slate-800 sm:py-12">
+    <main class="mx-auto max-w-3xl">
+        <section class="overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-8 text-white sm:px-10">
+                <div class="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/20 text-2xl font-bold ring-4 ring-white/20">
+                            {{ student["name"][0]|upper }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-widest text-indigo-100">Student portal</p>
+                            <h1 class="mt-1 text-3xl font-bold">Your profile</h1>
+                            <p class="mt-1 text-indigo-100">Welcome back, {{ student["name"] }}.</p>
+                        </div>
+                    </div>
+                    <form action="{{ url_for('logout') }}" method="post">
+                        <button type="submit" class="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10">
+                            Log out
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="p-6 sm:p-10">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-900">Personal details</h2>
+                    <p class="mt-1 text-sm text-slate-500">Your registered student information.</p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="profile-card">
+                        <span class="profile-label">Full name</span>
+                        <strong>{{ student["name"] }}</strong>
+                    </div>
+                    <div class="profile-card">
+                        <span class="profile-label">Email address</span>
+                        <strong class="break-all">{{ student["email"] }}</strong>
+                    </div>
+                    <div class="profile-card">
+                        <span class="profile-label">Age</span>
+                        <strong>{{ student["age"] }}</strong>
+                    </div>
+                    <div class="profile-card">
+                        <span class="profile-label">Course</span>
+                        <strong>{{ student["course"] }}</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,14 +1,28 @@
 import sqlite3
+import os
 from pathlib import Path
 
-from flask import Flask, render_template, request
-from werkzeug.security import generate_password_hash
+from dataclasses import dataclass
+
+from flask import Flask, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_PATH = BASE_DIR / "app.db"
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "development-only-secret-key")
+
+
+@dataclass
+class Student:
+    name: str
+    email: str
+    age: int
+    gender: str
+    course: str
+    password: str
 
 
 def init_database() -> None:
@@ -24,15 +38,14 @@ def init_database() -> None:
         )
         connection.execute(
             """
-            CREATE TABLE IF NOT EXISTS registrations (
+            CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                full_name TEXT NOT NULL,
+                name TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
                 age INTEGER NOT NULL,
                 gender TEXT NOT NULL,
                 course TEXT NOT NULL,
-                password_hash TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                password TEXT NOT NULL
             )
             """
         )
@@ -47,14 +60,14 @@ def home():
 @app.post("/register")
 def register():
     form = request.form
-    full_name = form.get("full_name", "").strip()
+    name = form.get("full_name", "").strip()
     email = form.get("email", "").strip().lower()
     age_value = form.get("age", "").strip()
     gender = form.get("gender", "").strip()
     course = form.get("course", "").strip()
     password = form.get("password", "")
 
-    if not all((full_name, email, age_value, gender, course, password)):
+    if not all((name, email, age_value, gender, course, password)):
         return render_template(
             "index.html",
             message="Please complete every required field.",
@@ -84,21 +97,22 @@ def register():
             message_type="error",
         ), 400
 
+    student = Student(name, email, age, gender, course, password)
+
     try:
         with sqlite3.connect(DATABASE_PATH) as connection:
             connection.execute(
                 """
-                INSERT INTO registrations
-                    (full_name, email, age, gender, course, password_hash)
+                INSERT INTO students (name, email, age, gender, course, password)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 (
-                    full_name,
-                    email,
-                    age,
-                    gender,
-                    course,
-                    generate_password_hash(password),
+                    student.name,
+                    student.email,
+                    student.age,
+                    student.gender,
+                    student.course,
+                    generate_password_hash(student.password),
                 ),
             )
             connection.commit()
@@ -108,12 +122,94 @@ def register():
             message="That email address is already registered.",
             message_type="error",
         ), 409
+    except sqlite3.Error:
+        return render_template(
+            "index.html",
+            message="Registration could not be saved. Please try again.",
+            message_type="error",
+        ), 500
 
-    return render_template(
-        "index.html",
-        message="Registration submitted successfully!",
-        message_type="success",
-    )
+    return redirect(url_for("success", name=student.name))
+
+
+@app.get("/success")
+def success():
+    name = request.args.get("name", "").strip()
+    if not name:
+        return redirect(url_for("home"))
+    return render_template("success.html", name=name)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html", message=None)
+
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+
+    if not email or not password:
+        return render_template(
+            "login.html",
+            message="Email and password are required.",
+        ), 400
+
+    try:
+        with sqlite3.connect(DATABASE_PATH) as connection:
+            connection.row_factory = sqlite3.Row
+            student = connection.execute(
+                "SELECT id, name, email, age, gender, course, password "
+                "FROM students WHERE email = ?",
+                (email,),
+            ).fetchone()
+    except sqlite3.Error:
+        return render_template(
+            "login.html",
+            message="Login is temporarily unavailable. Please try again.",
+        ), 500
+
+    if student is None or not check_password_hash(student["password"], password):
+        return render_template(
+            "login.html",
+            message="Incorrect email or password.",
+        ), 401
+
+    session.clear()
+    session["student_id"] = student["id"]
+    return redirect(url_for("profile"))
+
+
+@app.get("/profile")
+def profile():
+    student_id = session.get("student_id")
+    if student_id is None:
+        return redirect(url_for("login"))
+
+    try:
+        with sqlite3.connect(DATABASE_PATH) as connection:
+            connection.row_factory = sqlite3.Row
+            student = connection.execute(
+                "SELECT name, email, age, gender, course "
+                "FROM students WHERE id = ?",
+                (student_id,),
+            ).fetchone()
+    except sqlite3.Error:
+        return render_template(
+            "login.html",
+            message="Profile is temporarily unavailable. Please try again.",
+        ), 500
+
+    if student is None:
+        session.clear()
+        return redirect(url_for("login"))
+
+    return render_template("profile.html", student=student)
+
+
+@app.post("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 
 init_database()
