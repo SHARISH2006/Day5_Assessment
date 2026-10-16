@@ -1,5 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("registration-form");
+    if (form) {
+        initializeRegistrationValidation(form);
+    }
+
+    if (window.jQuery) {
+        initializeProfileInteractions();
+    }
+});
+
+function initializeRegistrationValidation(form) {
     const fields = ["full_name", "email", "age", "gender", "course", "password"];
 
     function showError(field, message) {
@@ -59,4 +69,55 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Please correct the highlighted fields.");
         }
     });
-});
+}
+
+    function initializeProfileInteractions() {
+        const $ = window.jQuery;
+        const liveTime = document.getElementById("live-time");
+        const details = $("#profile-details");
+        const toggleButton = $("#toggle-details");
+        const course = $("#course");
+
+        if (!liveTime || details.length === 0 || toggleButton.length === 0 || course.length === 0) {
+            return;
+        }
+
+        function updateTime() {
+            const utcNow = new Date();
+            const localTime = new Date(utcNow.getTime() + (5 * 60 + 30) * 60 * 1000);
+            const utcTime = [
+                localTime.getUTCHours(),
+                localTime.getUTCMinutes(),
+                localTime.getUTCSeconds(),
+            ]
+                .map((value) => String(value).padStart(2, "0"))
+                .join(":");
+
+            liveTime.textContent = utcTime;
+        }
+
+        updateTime();
+        window.setInterval(updateTime, 1000);
+
+        toggleButton.on("click", () => {
+            details.slideToggle(200, () => {
+                toggleButton.text(details.is(":visible") ? "Hide Details" : "Show Details");
+            });
+        });
+
+        course.on("change", function () {
+            const selectedCourse = $(this).val();
+            $.post($(this).data("update-url"), { course: selectedCourse })
+                .done((response) => {
+                    if (response.success) {
+                        alert(`Course updated to: ${response.course}`);
+                    } else {
+                        alert(response.message);
+                    }
+                })
+                .fail((error) => {
+                    const message = error.responseJSON?.message || "Course update failed.";
+                    alert(message);
+                });
+        });
+    }

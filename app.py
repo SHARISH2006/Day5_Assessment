@@ -4,7 +4,7 @@ from pathlib import Path
 
 from dataclasses import dataclass
 
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -210,6 +210,41 @@ def profile():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
+
+@app.post("/update-course")
+def update_course():
+    student_id = session.get("student_id")
+    course = request.form.get("course", "").strip()
+    allowed_courses = {
+        "Python",
+        "Web Development",
+        "Data Science",
+        "Cloud Computing",
+    }
+
+    if student_id is None:
+        return jsonify({"success": False, "message": "Please log in again."}), 401
+    if course not in allowed_courses:
+        return jsonify({"success": False, "message": "Please select a valid course."}), 400
+
+    try:
+        with sqlite3.connect(DATABASE_PATH) as connection:
+            cursor = connection.execute(
+                "UPDATE students SET course = ? WHERE id = ?",
+                (course, student_id),
+            )
+            connection.commit()
+    except sqlite3.Error:
+        return jsonify(
+            {"success": False, "message": "Course could not be updated."}
+        ), 500
+
+    if cursor.rowcount != 1:
+        session.clear()
+        return jsonify({"success": False, "message": "Student account not found."}), 404
+
+    return jsonify({"success": True, "course": course})
 
 
 init_database()

@@ -9,6 +9,7 @@ This project is a Flask-based student registration form. This README is a cumula
 | Level 1 | Frontend Form + Basic Logic | Completed |
 | Level 2 | Flask Setup + DB Interaction | Completed |
 | Level 3 | Session Handling + Profile Page | Completed |
+| Level 4 | Interactivity + Dashboard Features | Completed |
 
 ## 🔹 Level 1: Frontend Form + Basic Logic
 
@@ -109,6 +110,32 @@ Use Flask sessions to manage student login and display the authenticated student
 - Unauthenticated users are redirected from `/profile` to `/login`.
 - Profile data is loaded from SQLite using the session's `student_id`.
 - Logout is implemented at `/logout`.
+
+## 🔹 Level 4: Interactivity + Dashboard Features
+
+### Objective
+
+Add interactivity and dynamic dashboard behavior with JavaScript and jQuery.
+
+### Tasks Completed
+
+1. Add profile-page interactivity.
+   - Live time is displayed and updated every second with JavaScript.
+   - A jQuery `Show/Hide Details` toggle controls the profile details.
+2. Add a course update dropdown.
+   - Changing the course sends an AJAX `$.post` request to `/update-course`.
+   - The selected course is updated in the SQLite database.
+   - A confirmation alert displays `Course updated to: X`.
+3. Style the profile page with responsive Tailwind CSS cards and layout.
+
+### Achieved
+
+- jQuery is loaded on the profile page.
+- Live clock updates once per second.
+- Profile details can be shown or hidden with an animated toggle.
+- Course changes are saved only for the logged-in student.
+- Invalid course values and database errors return clear JSON error responses.
+- The profile dashboard uses responsive cards consistent with the rest of the application.
 
 ## Project Structure
 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Student Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body class="min-h-screen bg-slate-100 px-4 py-8 text-slate-800 sm:py-12">
     <main class="mx-auto max-w-3xl">
@@ -30,31 +31,64 @@
             </div>
 
             <div class="p-6 sm:p-10">
-                <div class="mb-6">
-                    <h2 class="text-xl font-bold text-slate-900">Personal details</h2>
-                    <p class="mt-1 text-sm text-slate-500">Your registered student information.</p>
+                <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Personal details</h2>
+                        <p class="mt-1 text-sm text-slate-500">Your registered student information.</p>
+                    </div>
+                    <div class="rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
+                        Live time: <span id="live-time">--:--:--</span>
+                    </div>
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-2">
+                <button id="toggle-details" type="button"
+                        class="mb-5 rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
+                    Hide Details
+                </button>
+
+                <div id="profile-details" class="grid gap-4 sm:grid-cols-2">
                     <div class="profile-card">
                         <span class="profile-label">Full name</span>
-                        <strong>{{ student["name"] }}</strong>
+                        <div class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-700 shadow-sm">
+                            {{ student["name"] }}
+                        </div>
                     </div>
                     <div class="profile-card">
                         <span class="profile-label">Email address</span>
-                        <strong class="break-all">{{ student["email"] }}</strong>
+                        <div class="mt-1 w-full break-all rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-700 shadow-sm">
+                            {{ student["email"] }}
+                        </div>
                     </div>
                     <div class="profile-card">
                         <span class="profile-label">Age</span>
-                        <strong>{{ student["age"] }}</strong>
+                        <div class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-700 shadow-sm">
+                            {{ student["age"] }}
+                        </div>
                     </div>
                     <div class="profile-card">
                         <span class="profile-label">Course</span>
-                        <strong>{{ student["course"] }}</strong>
+                        <label for="course" class="sr-only">Update course</label>
+                        <div class="relative mt-1">
+                            <select id="course"
+                                    class="w-full cursor-pointer appearance-none rounded-lg border border-slate-300 bg-white px-3 py-3 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-indigo-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                                    data-update-url="{{ url_for('update_course') }}">
+                                {% for course in ["Python", "Web Development", "Data Science", "Cloud Computing"] %}
+                                <option value="{{ course }}" {% if student["course"] == course %}selected{% endif %}>
+                                    {{ course }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-500" aria-hidden="true">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
