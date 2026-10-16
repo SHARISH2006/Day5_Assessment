@@ -1,0 +1,14 @@
+# Virtual environment
+venv/
+.venv/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment and tooling files
+.env
+.env.*
+.vscode/
+

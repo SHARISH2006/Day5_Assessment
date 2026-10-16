@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Course Registration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="min-h-screen bg-slate-100 px-4 py-8 text-slate-800 sm:py-12">
+    <main class="mx-auto max-w-3xl">
+        <section class="rounded-2xl bg-white p-6 shadow-xl sm:p-10">
+            <div class="mb-8">
+                <p class="text-sm font-semibold uppercase tracking-widest text-indigo-600">Learn and grow</p>
+                <h1 class="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">Course registration</h1>
+                <p class="mt-3 text-slate-600">Complete the form below to enroll in a course.</p>
+            </div>
+
+            {% if message %}
+            <div class="mb-6 rounded-lg border px-4 py-3 text-sm
+                {% if message_type == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-800
+                {% else %}border-red-200 bg-red-50 text-red-800{% endif %}"
+                role="alert">
+                {{ message }}
+            </div>
+            {% endif %}
+
+            <form id="registration-form" action="{{ url_for('register') }}" method="post" novalidate>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <label for="full_name" class="form-label">Full Name</label>
+                        <input id="full_name" name="full_name" type="text" autocomplete="name"
+                               class="form-input" placeholder="Enter your full name" required>
+                        <p class="field-error" id="full_name-error"></p>
+                    </div>
+
+                    <div>
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" name="email" type="email" autocomplete="email"
+                               class="form-input" placeholder="you@example.com" required>
+                        <p class="field-error" id="email-error"></p>
+                    </div>
+
+                    <div>
+                        <label for="age" class="form-label">Age</label>
+                        <input id="age" name="age" type="number" min="1" max="120"
+                               class="form-input" placeholder="Enter your age" required>
+                        <p class="field-error" id="age-error"></p>
+                    </div>
+
+                    <div>
+                        <label for="gender" class="form-label">Gender</label>
+                        <select id="gender" name="gender" class="form-input" required>
+                            <option value="">Select gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                        <p class="field-error" id="gender-error"></p>
+                    </div>
+
+                    <div>
+                        <label for="course" class="form-label">Course</label>
+                        <select id="course" name="course" class="form-input" required>
+                            <option value="">Select a course</option>
+                            <option value="Python">Python</option>
+                            <option value="Web Development">Web Development</option>
+                            <option value="Data Science">Data Science</option>
+                            <option value="Cloud Computing">Cloud Computing</option>
+                        </select>
+                        <p class="field-error" id="course-error"></p>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="password" class="form-label">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="new-password"
+                               class="form-input" placeholder="At least 6 characters" required>
+                        <p class="field-error" id="password-error"></p>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="mt-8 w-full rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200">
+                    Register
+                </button>
+            </form>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
